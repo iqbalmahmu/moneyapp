@@ -1,5 +1,6 @@
 const registerValidator = require("./../validator/registerValidator");
 const User = require("./../model/userSchema");
+const bcrypt = require("bcrypt");
 
 module.exports.login = (_req, res) => {
   let name = _req.body.name;
@@ -11,7 +12,7 @@ module.exports.login = (_req, res) => {
   console.log(_req.body.password);
 };
 
-module.exports.register = (_req, res) => {
+module.exports.register = async (_req, res) => {
   //   read client data from user
   // validate check
   // check for duplicates
@@ -23,34 +24,24 @@ module.exports.register = (_req, res) => {
   let validate = registerValidator({ name, email, password, confirmPassword });
 
   if (!validate.isValid) {
-    return res.status(400).json(validate.error);
-  } else {
-    User.findOne({ email })
-      .then((existingUser) => {
-        if (existingUser) {
-          return res.status(500).json({ message: `User already registered` });
-        }
-        // create new user
+    return res.status(401).json({ message: `user validation failed` });
+  }
 
-        let newUser = User({
-          email,
-          name,
-          password,
-        });
+  try {
+    const existingUser = await User.findOne({ email });
+    res.status(404).json({ message: `user already registered` });
 
-        newUser
-          .save()
-          .then(() => {
-            res.status(200).json({ message: `Successfully created new user` });
-          })
-          .catch((error) => {
-            console.log(error.message);
-            res.status(500).json({ message: `Error creating new user` });
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).json({ message: "server error happened" });
-      });
+    // hashing password
+
+    const hashadPassword = await bcrypt.hash(password, 12);
+
+    // create new user
+
+    const newUser = new User({ name, email, password: hashadPassword });
+
+    await newUser.save();
+    res.status(200).json({ message: `user create successfully` });
+  } catch (err) {
+    res.status(500).json(err.message);
   }
 };
