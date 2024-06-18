@@ -9,7 +9,7 @@ module.exports.login = (_req, res) => {
 };
 
 module.exports.register = (_req, res) => {
-  res.send(`please enter your email and password to register`);
+  // validte the user object
   // user input
   // user validation
   // user confirmation
