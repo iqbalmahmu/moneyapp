@@ -1,5 +1,6 @@
 const User = require("./../model/userSchema");
 const schemaValidator = require("./../validator/userValidator");
+const bcrypt = require("bcrypt");
 
 module.exports.login = (_req, res) => {
   let name = _req.body.name;
@@ -11,7 +12,7 @@ module.exports.login = (_req, res) => {
   console.log(_req.body.password);
 };
 
-module.exports.register = async (_req, res) => {
+module.exports.register = (_req, res) => {
   let { name, email, password, confirmPassword } = _req.body;
 
   // Validate the user object
@@ -26,25 +27,36 @@ module.exports.register = async (_req, res) => {
     return res.status(400).json(userValidator.error);
   }
 
-  try {
-    // Check if user already registered
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: "Email already registered" });
-    }
+  // Check if user already registered
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
 
-    // Create new user
-    const newUser = new User({
-      name,
-      email,
-      password,
+      // Hash the password
+      bcrypt
+        .hash(password, 12)
+        .then((hashedPassword) => {
+          // Create new user
+          const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+          });
+
+          return newUser.save();
+        })
+        .then(() => {
+          res.status(201).json({ message: "Successfully created new user" });
+        })
+        .catch((err) => {
+          console.log(err.message);
+          res.status(500).json({ message: `Server error: ${err.message}` });
+        });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      res.status(500).json({ message: `Server error: ${err.message}` });
     });
-
-    await newUser.save();
-
-    res.status(201).json({ message: "Successfully created new user" });
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).json({ message: `Server error: ${err.message}` });
-  }
 };
