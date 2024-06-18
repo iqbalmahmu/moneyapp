@@ -1,4 +1,5 @@
 const registerValidator = require("./../validator/registerValidator");
+const User = require("./../model/userSchema");
 
 module.exports.login = (_req, res) => {
   let name = _req.body.name;
@@ -24,8 +25,25 @@ module.exports.register = (_req, res) => {
   if (!validate.isValid) {
     res.status(400).json(validate.error);
   } else {
-    res.status(200).json({
-      massage: `everythis is ok for proccide`,
-    });
+    User.findOne({ email })
+      .then((user) => {
+        console.log(user);
+        if (user) {
+          res.status(400).json({ message: `user already registered` });
+        } else {
+          user
+            .save()
+            .then(() =>
+              res.status(200).json({ message: `user successfully registered` })
+            )
+            .catch((error) => {
+              console.log(error.message);
+            });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: "server error happened" });
+      });
   }
 };

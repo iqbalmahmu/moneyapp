@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema();
+const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   name: {
@@ -21,7 +21,7 @@ const userSchema = new Schema({
   transections: {
     type: [
       {
-        type: Schema.types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Transaction",
       },
     ],
