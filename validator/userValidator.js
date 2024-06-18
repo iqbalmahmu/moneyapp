@@ -20,8 +20,8 @@ const validate = (user) => {
     error.password = `please provide a password `;
   }
   // check if the user confirmpassword is matches the password
-  else if (user.password !== user.confirmpassword) {
-    error.confirmpassword = `please provide a confirm password`;
+  else if (user.password !== user.confirmPassword) {
+    error.confirmPassword = `please provide a confirm password`;
   } else if (!/[A-Z]/.test(user.password) || !/[a-z]/.test(user.password)) {
     error.password = `please provide a password that contains at least one uppercase and lowercase letters`;
   }
