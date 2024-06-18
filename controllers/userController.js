@@ -23,23 +23,30 @@ module.exports.register = (_req, res) => {
   let validate = registerValidator({ name, email, password, confirmPassword });
 
   if (!validate.isValid) {
-    res.status(400).json(validate.error);
+    return res.status(400).json(validate.error);
   } else {
     User.findOne({ email })
-      .then((user) => {
-        console.log(user);
-        if (user) {
-          res.status(400).json({ message: `user already registered` });
-        } else {
-          user
-            .save()
-            .then(() =>
-              res.status(200).json({ message: `user successfully registered` })
-            )
-            .catch((error) => {
-              console.log(error.message);
-            });
+      .then((existingUser) => {
+        if (existingUser) {
+          return res.status(500).json({ message: `User already registered` });
         }
+        // create new user
+
+        let newUser = User({
+          email,
+          name,
+          password,
+        });
+
+        newUser
+          .save()
+          .then(() => {
+            res.status(200).json({ message: `Successfully created new user` });
+          })
+          .catch((error) => {
+            console.log(error.message);
+            res.status(500).json({ message: `Error creating new user` });
+          });
       })
       .catch((err) => {
         console.log(err);
