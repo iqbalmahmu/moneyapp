@@ -4,7 +4,7 @@ module.exports = {
     res.status(500).json({ message: `server error occurred: ` });
   },
 
-  resorcesError(res, message) {
+  resourceError(res, message) {
     res.status(400).json({ message });
   },
 };

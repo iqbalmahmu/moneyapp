@@ -37,7 +37,7 @@ module.exports.login = async (_req, res) => {
           email: existingUser.email,
           name: existingUser.name,
         },
-        "your_jwt_secret", // Replace with your actual JWT secret key
+        "secret", // Replace with your actual JWT secret key
         { expiresIn: "1h" }
       );
 
